@@ -1,0 +1,59 @@
+function pirates(input) {
+    let listOfTowns = {};
+    let line;
+
+    while ((line = input.shift()) !== "Sail") {
+        let [name, people, money] = line.split(`||`);
+        people = Number(people);
+        money = Number(money);
+        if (!listOfTowns.hasOwnProperty(name)) {
+            listOfTowns[name] = {
+                population: people,
+                gold: money
+            }
+        } else {
+            listOfTowns[name].population += people;
+            listOfTowns[name].gold += money;
+        }
+    }
+    while ((line = input.shift()) !== "End") {
+        let [command, townName, ...params] = line.split(`=>`);
+        if (command === "Plunder") {
+            let [peopleKilled, stolenGold] = params
+            peopleKilled = Number(peopleKilled);
+            stolenGold = Number(stolenGold);
+            if (listOfTowns.hasOwnProperty(townName)) {
+                listOfTowns[townName].gold -= stolenGold;
+                listOfTowns[townName].population -= peopleKilled;
+                console.log(`${townName} plundered! ${stolenGold} gold stolen, ${peopleKilled} citizens killed.`);
+            }
+            if (listOfTowns[townName].gold <= 0 || listOfTowns[townName].population <= 0) {
+                console.log(`${townName} has been wiped off the map!`);
+                delete listOfTowns[townName];
+            }
+        } else if (command === "Prosper") {
+            let [increasedGold] = params;
+            increasedGold = Number(increasedGold);
+            if (increasedGold < 0) {
+                console.log(`Gold added cannot be a negative number!`);
+            } else {
+                listOfTowns[townName].gold += increasedGold;
+                console.log(`${increasedGold} gold added to the city treasury. ${townName} now has ${listOfTowns[townName].gold} gold.`);
+            }
+
+
+        }
+    }
+    let sorted = Object.entries(listOfTowns);
+    sorted.sort((a, b) => {
+        let [townNameA, townInfoA] = a;
+        let [townNameB, townInfoB] = b;
+        return townInfoB.gold - townInfoA.gold || townNameA.localeCompare(townNameB);
+    });
+    if (sorted.length !== 0) {
+        console.log(`Ahoy, Captain! There are ${sorted.length} wealthy settlements to go to:`);
+        sorted.forEach(element => {
+            console.log(`${element[0]} -> Population: ${listOfTowns[element[0]].population} citizens, Gold: ${listOfTowns[element[0]].gold} kg`);
+        });
+    }
+}
